@@ -225,3 +225,83 @@ td { border-bottom: 1px solid rgba(255,255,255,0.03); }
 .chart-container.wide { grid-column: span 2; }
 .chart-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--text-primary); }
 .canvas-wrapper { position: relative; width: 100%; display: flex; justify-content: center; align-items: center; }
+
+/* =========================================
+   === PREMIUM PRESENTATION UPGRADES ===
+   ========================================= */
+
+/* Custom App-Like Scrollbars */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-purple); }
+
+/* Ambient Background Animation (Nebula Effect) */
+@keyframes ambientDrift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+body {
+    background: linear-gradient(-45deg, #0B0F19, #131A2B, #1B132C, #0B1320);
+    background-size: 400% 400%;
+    animation: ambientDrift 20s ease infinite;
+}
+.main-content {
+    background: transparent; /* Overriding previous static background */
+}
+
+/* Staggered Cascade-up Entrance Animations */
+@keyframes cascadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.hero-section { animation: cascadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
+.features-grid .feature-card:nth-child(1) { animation: cascadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; }
+.features-grid .feature-card:nth-child(2) { animation: cascadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both; }
+.features-grid .feature-card:nth-child(3) { animation: cascadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both; }
+.section-container { animation: cascadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both; }
+
+/* Enhanced Feature Cards (Glassmorphism 2.0) */
+.feature-card {
+    background-color: rgba(30, 41, 59, 0.3) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+.feature-card:hover {
+    border-color: rgba(139, 92, 246, 0.4) !important;
+    box-shadow: 0 10px 40px rgba(139, 92, 246, 0.15);
+    background-color: rgba(30, 41, 59, 0.5) !important;
+    transform: translateY(-4px);
+}
+
+/* Living Call-to-Action Button */
+@keyframes sweepGradient {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+.btn-predict {
+    background: linear-gradient(90deg, #3B82F6, #8B5CF6, #EC4899, #8B5CF6, #3B82F6) ;
+    background-size: 200% auto;
+    animation: sweepGradient 4s linear infinite;
+    position: relative;
+    z-index: 1;
+}
+.btn-predict::before {
+    content: '';
+    position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+    background: inherit; filter: blur(12px); z-index: -1; opacity: 0; transition: opacity 0.3s;
+}
+.btn-predict:hover::before { opacity: 0.8; }
+
+/* Pulsing Spotlight on Winning Model Row */
+@keyframes pulseGlow {
+    0% { box-shadow: inset 4px 0 0px rgba(59, 130, 246, 1), inset 0 0 0 rgba(59, 130, 246, 0); }
+    50% { box-shadow: inset 4px 0 0px rgba(59, 130, 246, 1), inset 15px 0 25px -10px rgba(59, 130, 246, 0.5); }
+    100% { box-shadow: inset 4px 0 0px rgba(59, 130, 246, 1), inset 0 0 0 rgba(59, 130, 246, 0); }
+}
+.highlight-row td {
+    animation: pulseGlow 3s infinite;
+}
