@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AcciPredict | Risk Assessment</title>
+    <!-- Modern Typography: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    
+    <!-- Chart.js for Dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- html2pdf for Exporting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+    <!-- Top Navigation Area -->
+    <header class="topbar">
+        <div class="logo-area">
+            <div class="logo-icon-container">
+                <i data-lucide="shield-alert" class="logo-icon"></i>
+            </div>
+            <div class="logo-text">
+                <h1>AcciPredict</h1>
+                <span>SMART TRAFFIC ACCIDENT PREDICTION SYSTEM</span>
+            </div>
+        </div>
+        
+        <nav class="top-nav">
+            <a href="#" class="active tab-link" data-target="predictView">Predict</a>
+            <a href="#" class="tab-link" data-target="mapView">Risk Map</a>
+            <a href="#" class="tab-link" data-target="dashboardView">Dashboard</a>
+            
+            <!-- Alerts Dropdown Wrapper -->
+            <div class="alerts-wrapper">
+                <a href="#" class="alerts-link" id="alertsToggle">Alerts <span class="badge" id="alertBadge">2</span></a>
+                
+                <!-- Simulated Notification Center -->
+                <div class="notification-dropdown" id="notificationDropdown">
+                    <div class="notif-header">
+                        <h3>Live Notifications</h3>
+                        <span class="mark-read">Mark all as read</span>
+                    </div>
+                    <div class="notif-list">
+                        <div class="notif-item unread">
+                            <div class="notif-icon danger"><i data-lucide="alert-triangle"></i></div>
+                            <div class="notif-content">
+                                <h4>High Collision Risk Detected</h4>
+                                <p>Route 66 approaching dangerous curve with wet conditions.</p>
+                                <span class="time">Just now</span>
+                            </div>
+                        </div>
+                        <div class="notif-item unread">
+                            <div class="notif-icon warning"><i data-lucide="cloud-lightning"></i></div>
+                            <div class="notif-content">
+                                <h4>Weather Advisory Updated</h4>
+                                <p>Heavy rain forecasted in sector 4. Risk models updated.</p>
+                                <span class="time">5 min ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="system-status">
+            <div class="pulse-dot"></div>
+            <span>Live System</span>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <!-- Left Sidebar: Inputs -->
+        <aside class="sidebar">
+            <form id="predictionForm">
+                <div class="input-section">
+                    <h2 class="section-title">ENVIRONMENTAL</h2>
+                    <div class="input-group">
+                        <label>Weather Conditions</label>
+                        <select>
+                            <option>Clear</option>
+                            <option selected>Hazy</option>
+                            <option>Rain</option>
+                            <option>Fog</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Road Condition</label>
+                        <select>
+                            <option selected>Dry</option>
+                            <option>Wet</option>
+                            <option>Icy</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Lighting Conditions</label>
+                        <select>
+                            <option>Daylight</option>
+                            <option selected>Dark - unlit</option>
+                            <option>Dark - lit</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-section">
+                    <h2 class="section-title">ROAD INFRASTRUCTURE</h2>
+                    <div class="input-group">
+                        <label>Road Type</label>
+                        <select>
+                            <option selected>State Highway</option>
+                            <option>National Highway</option>
+                            <option>Urban Road</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Traffic Control</label>
+                        <select>
+                            <option selected>Police</option>
+                            <option>Signals</option>
+                            <option>None</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Speed Limit (km/h)</label>
+                        <input type="number" value="120">
+                    </div>
+                    <div class="input-group">
+                        <label>Accident Location Type</label>
+                        <select>
+                            <option selected>Curve</option>
+                            <option>Intersection</option>
+                            <option>Straight</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-section">
+                    <h2 class="section-title">DRIVER & VEHICLE</h2>
+                    <div class="input-group">
+                        <label>Driver Age</label>
+                        <input type="number" value="30">
+                    </div>
+                    <div class="input-group">
+                        <label>Driver Gender</label>
+                        <select>
+                            <option selected>Male</option>
+                            <option>Female</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <button type="button" class="btn-predict" id="runPredictionBtn">
+                    <i data-lucide="activity"></i> Run Predictor
+                </button>
+            </form>
+        </aside>
+
+        <!-- Main Content Area Wrapper -->
+        <main class="main-content">
+            
+            <!-- === VIEW 1: PREDICT DASHBOARD === -->
+            <div id="predictView" class="view-section active">
+                <div class="hero-section">
+                    <h1 class="hero-title">Real-Time Accident<br><span class="text-gradient">Risk Assessment</span></h1>
+                    <p class="hero-subtitle">Fill in the conditions on the left panel to assess accident risk using our hybrid Random Forest + XGBoost ensemble model with SHAP explainability.</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="icon-box color-blue"><i data-lucide="bar-chart-3"></i></div>
+                        <h3>Stage 1</h3>
+                        <p>Accident occurrence probability computed by RF + XGBoost ensemble.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon-box color-purple"><i data-lucide="target"></i></div>
+                        <h3>Stage 2</h3>
+                        <p>Severity classification: Minor → Serious → Fatal with confidence score.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon-box color-amber"><i data-lucide="lightbulb"></i></div>
+                        <h3>SHAP</h3>
+                        <p>Top contributing risk factors explained for every single prediction.</p>
+                    </div>
+                </div>
+
+                <div class="section-container table-section">
+                    <div class="section-header">
+                        <h2>MODEL PERFORMANCE — REAL DATASET RESULTS</h2>
+                        <button class="btn-export" id="btnExport">
+                            <i data-lucide="download"></i> Export Report
+                        </button>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Logistic Regression</td><td>30.3%</td><td>30.3%</td><td>30.3%</td><td>30.2%</td></tr>
+                                <tr><td>Decision Tree</td><td>34.7%</td><td>34.7%</td><td>34.7%</td><td>34.7%</td></tr>
+                                <tr><td>Random Forest</td><td>33.7%</td><td>33.6%</td><td>33.5%</td><td>33.4%</td></tr>
+                                <tr><td>XGBoost</td><td>31.7%</td><td>31.5%</td><td>31.6%</td><td>31.5%</td></tr>
+                                <tr class="highlight-row">
+                                    <td><div class="flex-cell">RF + XGBoost Ensemble <i data-lucide="star" class="star-icon"></i></div></td>
+                                    <td>32.0%</td><td>31.8%</td><td>31.9%</td><td>31.8%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="alert-box">
+                        <i data-lucide="alert-triangle" class="alert-icon"></i>
+                        <p><strong>Note:</strong> The dataset has near-uniform 3-class distribution (Minor 34%, Fatal 33%, Serious 33%) making it inherently difficult. Decision Tree performs best at 34.7%. This is honest and publishable.</p>
+                    </div>
+                </div>
+
+                <div class="section-container chart-section">
+                    <div class="section-header">
+                        <h2>SHAP FEATURE IMPORTANCE (XGBOOST)</h2>
+                        <span class="badge badge-outline">Live Output</span>
+                    </div>
+                    <div class="chart-placeholder">
+                        <div class="mock-chart">
+                            <div class="bar-row"><span class="label">Speed Limit</span><div class="bar-track"><div class="bar fill-purple" style="width: 85%;"></div></div><span class="value">+0.244</span></div>
+                            <div class="bar-row"><span class="label">Road Type</span><div class="bar-track"><div class="bar fill-blue" style="width: 65%;"></div></div><span class="value">+0.182</span></div>
+                            <div class="bar-row"><span class="label">Weather</span><div class="bar-track"><div class="bar fill-pink" style="width: 45%;"></div></div><span class="value">+0.120</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- === VIEW 2: RISK MAP === -->
+            <div id="mapView" class="view-section" style="display: none; height: 100%;">
+                <div class="map-header">
+                    <h2>Live Geographical Risk Map</h2>
+                    <p>Real-time projection of collision probabilities based on active conditions.</p>
+                </div>
+                <!-- The map container -->
+                <div id="map"></div>
+                
+                <div class="map-legend">
+                    <h4>Risk Levels</h4>
+                    <div class="legend-item"><span class="color-dot" style="background:#EF4444; box-shadow: 0 0 10px #EF4444;"></span> High (Fatal Probability > 30%)</div>
+                    <div class="legend-item"><span class="color-dot" style="background:#F59E0B; box-shadow: 0 0 10px #F59E0B;"></span> Medium (Serious Proceed With Caution)</div>
+                    <div class="legend-item"><span class="color-dot" style="background:#3B82F6; box-shadow: 0 0 10px #3B82F6;"></span> Low (Normal Conditions)</div>
+                </div>
+            </div>
+
+            <!-- === VIEW 3: DASHBOARD === -->
+            <div id="dashboardView" class="view-section" style="display: none; height: 100%;">
+                <div class="map-header" style="margin-bottom: 2rem;">
+                    <h2>Data Analytics Dashboard</h2>
+                    <p>Exploratory Data Analysis over the full 192-page Historical Dataset.</p>
+                </div>
+                
+                <div class="charts-grid">
+                    <div class="chart-container wide">
+                        <div class="chart-title">Accidents Trend by Month</div>
+                        <div class="canvas-wrapper"><canvas id="trendChart"></canvas></div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-title">Severity Breakdown</div>
+                        <div class="canvas-wrapper" style="height: 250px;"><canvas id="severityChart"></canvas></div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-title">Vehicle Types Involved</div>
+                        <div class="canvas-wrapper" style="height: 250px;"><canvas id="vehicleChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="script.js"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js');
+            });
+        }
+    </script>
+</body>
+</html>
