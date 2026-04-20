@@ -1,25 +1,25 @@
 :root {
-    /* Color Palette - Premium Dark Theme */
-    --bg-base: #0B0F19;
-    --bg-surface: #131A2B;
-    --bg-surface-light: #1E293B;
+    /* Color Palette - Traffic Command Center Theme */
+    --bg-base: #0D0D0D;
+    --bg-surface: #161616;
+    --bg-surface-light: #1F1F1F;
     
-    --text-primary: #F8FAFC;
-    --text-secondary: #94A3B8;
-    --text-muted: #64748B;
+    --text-primary: #F5F0E8;
+    --text-secondary: #A89880;
+    --text-muted: #6B5E50;
     
-    --border-color: rgba(255, 255, 255, 0.08);
-    --border-highlight: rgba(255, 255, 255, 0.15);
+    --border-color: rgba(255, 180, 80, 0.08);
+    --border-highlight: rgba(255, 180, 80, 0.2);
     
-    /* Accents */
-    --accent-blue: #3B82F6;
-    --accent-purple: #8B5CF6;
-    --accent-pink: #EC4899;
+    /* Accents - Warm Amber/Red Command Center */
+    --accent-blue: #E8820C;
+    --accent-purple: #D94F1E;
+    --accent-pink: #F0A500;
     --accent-amber: #F59E0B;
-    --accent-green: #10B981;
+    --accent-green: #22C55E;
     --accent-red: #EF4444;
     
-    --gradient-primary: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    --gradient-primary: linear-gradient(135deg, #E8820C, #D94F1E);
     --font-main: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
@@ -183,7 +183,7 @@ table { width: 100%; border-collapse: collapse; }
 th, td { padding: 1rem; text-align: left; font-size: 0.9rem; }
 th { background-color: rgba(255,255,255,0.02); color: var(--text-secondary); font-weight: 500; border-bottom: 1px solid var(--border-color); }
 td { border-bottom: 1px solid rgba(255,255,255,0.03); }
-.highlight-row td { background: rgba(59, 130, 246, 0.1); color: white; font-weight: 600; }
+.highlight-row td { background: rgba(232, 130, 12, 0.1); color: #F5F0E8; font-weight: 600; }
 .highlight-row td:first-child { border-left: 3px solid var(--accent-blue); }
 .flex-cell { display: flex; align-items: center; gap: 8px; }
 .star-icon { width: 16px; height: 16px; color: var(--accent-blue); fill: var(--accent-blue); }
@@ -233,8 +233,8 @@ td { border-bottom: 1px solid rgba(255,255,255,0.03); }
 /* Custom App-Like Scrollbars */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg-base); }
-::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent-purple); }
+::-webkit-scrollbar-thumb { background: rgba(232, 130, 12, 0.35); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-blue); }
 
 /* Ambient Background Animation (Nebula Effect) */
 @keyframes ambientDrift {
@@ -243,7 +243,7 @@ td { border-bottom: 1px solid rgba(255,255,255,0.03); }
     100% { background-position: 0% 50%; }
 }
 body {
-    background: linear-gradient(-45deg, #0B0F19, #131A2B, #1B132C, #0B1320);
+    background: linear-gradient(-45deg, #0D0D0D, #111008, #160C06, #0D0A0D);
     background-size: 400% 400%;
     animation: ambientDrift 20s ease infinite;
 }
@@ -283,7 +283,7 @@ body {
     100% { background-position: 200% 50%; }
 }
 .btn-predict {
-    background: linear-gradient(90deg, #3B82F6, #8B5CF6, #EC4899, #8B5CF6, #3B82F6) ;
+    background: linear-gradient(90deg, #E8820C, #D94F1E, #F0A500, #D94F1E, #E8820C);
     background-size: 200% auto;
     animation: sweepGradient 4s linear infinite;
     position: relative;
@@ -298,10 +298,120 @@ body {
 
 /* Pulsing Spotlight on Winning Model Row */
 @keyframes pulseGlow {
-    0% { box-shadow: inset 4px 0 0px rgba(59, 130, 246, 1), inset 0 0 0 rgba(59, 130, 246, 0); }
-    50% { box-shadow: inset 4px 0 0px rgba(59, 130, 246, 1), inset 15px 0 25px -10px rgba(59, 130, 246, 0.5); }
-    100% { box-shadow: inset 4px 0 0px rgba(59, 130, 246, 1), inset 0 0 0 rgba(59, 130, 246, 0); }
+    0% { box-shadow: inset 4px 0 0px rgba(232, 130, 12, 1), inset 0 0 0 rgba(232, 130, 12, 0); }
+    50% { box-shadow: inset 4px 0 0px rgba(232, 130, 12, 1), inset 15px 0 25px -10px rgba(232, 130, 12, 0.4); }
+    100% { box-shadow: inset 4px 0 0px rgba(232, 130, 12, 1), inset 0 0 0 rgba(232, 130, 12, 0); }
 }
 .highlight-row td {
     animation: pulseGlow 3s infinite;
+}
+
+/* =========================================
+   === RISK RESULT PANEL ===
+   ========================================= */
+@keyframes panelReveal {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes meterFill {
+    from { width: 0%; }
+}
+@keyframes countUp {
+    from { opacity: 0; transform: scale(0.8); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.risk-result-panel {
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.1);
+    overflow: hidden;
+    margin-bottom: 2rem;
+    animation: panelReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+.risk-result-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem 1.5rem;
+    background: rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.risk-result-title {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em;
+    color: var(--text-muted); text-transform: uppercase;
+}
+.risk-result-title i { width: 16px; height: 16px; }
+.risk-level-badge {
+    font-size: 0.75rem; font-weight: 800; letter-spacing: 0.1em;
+    padding: 4px 14px; border-radius: 20px; text-transform: uppercase;
+}
+.risk-level-badge.high  { background: rgba(239,68,68,0.15); color: #EF4444; border: 1px solid rgba(239,68,68,0.4); }
+.risk-level-badge.medium { background: rgba(245,158,11,0.15); color: #F59E0B; border: 1px solid rgba(245,158,11,0.4); }
+.risk-level-badge.low   { background: rgba(16,185,129,0.15); color: #10B981; border: 1px solid rgba(16,185,129,0.4); }
+
+.risk-result-body {
+    display: grid; grid-template-columns: 1fr 1fr 2fr;
+    gap: 0;
+}
+.risk-metric-card {
+    padding: 1.8rem 1.5rem;
+    background: rgba(19, 26, 43, 0.6);
+    border-right: 1px solid rgba(255,255,255,0.05);
+}
+.risk-metric-card:last-child { border-right: none; }
+.risk-metric-label {
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em;
+    color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.8rem;
+}
+.risk-prob-number {
+    font-size: 3.5rem; font-weight: 800; line-height: 1;
+    letter-spacing: -0.04em; margin-bottom: 1rem;
+    animation: countUp 0.5s ease both;
+}
+.risk-prob-number.high   { color: #EF4444; text-shadow: 0 0 30px rgba(239,68,68,0.4); }
+.risk-prob-number.medium { color: #F59E0B; text-shadow: 0 0 30px rgba(245,158,11,0.4); }
+.risk-prob-number.low    { color: #10B981; text-shadow: 0 0 30px rgba(16,185,129,0.4); }
+
+.risk-meter-track {
+    height: 6px; background: rgba(255,255,255,0.08);
+    border-radius: 6px; overflow: hidden;
+}
+.risk-meter-fill {
+    height: 100%; border-radius: 6px; width: 0%;
+    transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.risk-meter-fill.high   { background: linear-gradient(90deg, #EF4444, #FF6B6B); box-shadow: 0 0 8px rgba(239,68,68,0.6); }
+.risk-meter-fill.medium { background: linear-gradient(90deg, #F59E0B, #FCD34D); box-shadow: 0 0 8px rgba(245,158,11,0.6); }
+.risk-meter-fill.low    { background: linear-gradient(90deg, #10B981, #34D399); box-shadow: 0 0 8px rgba(16,185,129,0.6); }
+
+.risk-severity-label {
+    font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em;
+    margin-bottom: 0.5rem; animation: countUp 0.5s 0.1s ease both;
+}
+.risk-severity-label.fatal   { color: #EF4444; }
+.risk-severity-label.serious { color: #F59E0B; }
+.risk-severity-label.minor   { color: #10B981; }
+
+.risk-confidence {
+    font-size: 0.85rem; color: var(--text-muted);
+}
+
+.risk-factors-list { display: flex; flex-direction: column; gap: 0.7rem; }
+.risk-factor-item { display: flex; align-items: center; gap: 0.8rem; }
+.risk-factor-name {
+    width: 130px; font-size: 0.82rem;
+    color: var(--text-secondary); flex-shrink: 0;
+}
+.risk-factor-bar-track {
+    flex-grow: 1; height: 8px; background: rgba(255,255,255,0.06);
+    border-radius: 4px; overflow: hidden;
+}
+.risk-factor-bar {
+    height: 100%; border-radius: 4px; width: 0%;
+    transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.risk-factor-val {
+    font-size: 0.78rem; font-family: monospace;
+    color: white; width: 50px; text-align: right; flex-shrink: 0;
 }

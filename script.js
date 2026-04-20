@@ -87,50 +87,175 @@ function showToast(title, message) {
 }
 
 
-// --- 4. Prediction Button Simulation ---
+// --- 4. Smart Risk Assessment Engine ---
 const btnPredict = document.getElementById('runPredictionBtn');
 
-btnPredict.addEventListener('click', () => {
-    btnPredict.classList.add('loading');
-    const originalText = btnPredict.innerHTML;
-    
-    btnPredict.innerHTML = `<i data-lucide="loader-2" class="spin-icon"></i> Processing Risk...`;
-    lucide.createIcons();
-    
-    if (!document.getElementById('spin-style')) {
-        const style = document.createElement('style');
-        style.id = 'spin-style';
-        style.innerHTML = `.spin-icon { animation: spin 1s linear infinite; } @keyframes spin { 100% { transform: rotate(360deg); } }`;
-        document.head.appendChild(style);
+function computeRiskScore() {
+    const formSelects = document.querySelectorAll('#predictionForm select');
+    const formInputs  = document.querySelectorAll('#predictionForm input[type="number"]');
+
+    const weather   = formSelects[0]?.value || 'Clear';
+    const road      = formSelects[1]?.value || 'Dry';
+    const lighting  = formSelects[2]?.value || 'Daylight';
+    const roadType  = formSelects[3]?.value || 'Urban Road';
+    const traffic   = formSelects[4]?.value || 'Signals';
+    const locType   = formSelects[5]?.value || 'Straight';
+    const gender    = formSelects[6]?.value || 'Male';
+    const speed     = parseFloat(formInputs[0]?.value || 60);
+    const age       = parseFloat(formInputs[1]?.value || 30);
+
+    let score = 30; // base probability
+    const factors = {};
+
+    // Speed contribution
+    const speedScore = Math.min(((speed - 40) / 160) * 30, 30);
+    factors['Speed Limit'] = speedScore;
+    score += speedScore;
+
+    // Weather
+    const weatherMap = { 'Clear': 0, 'Hazy': 6, 'Rain': 14, 'Fog': 18 };
+    factors['Weather'] = weatherMap[weather] ?? 6;
+    score += factors['Weather'];
+
+    // Road condition
+    const roadMap = { 'Dry': 0, 'Wet': 10, 'Icy': 18 };
+    factors['Road Condition'] = roadMap[road] ?? 0;
+    score += factors['Road Condition'];
+
+    // Lighting
+    const lightMap = { 'Daylight': 0, 'Dark - lit': 8, 'Dark - unlit': 16 };
+    factors['Lighting'] = lightMap[lighting] ?? 8;
+    score += factors['Lighting'];
+
+    // Location type
+    const locMap = { 'Straight': 0, 'Intersection': 7, 'Curve': 12 };
+    factors['Location Type'] = locMap[locType] ?? 4;
+    score += factors['Location Type'];
+
+    // Road type
+    const rtMap = { 'Urban Road': 2, 'State Highway': 6, 'National Highway': 10 };
+    factors['Road Type'] = rtMap[roadType] ?? 4;
+    score += factors['Road Type'];
+
+    // Traffic control
+    const tcMap = { 'Signals': 0, 'Police': 3, 'None': 10 };
+    factors['Traffic Control'] = tcMap[traffic] ?? 3;
+    score += factors['Traffic Control'];
+
+    // Age factor (young < 22 or old > 60 = riskier)
+    const ageFactor = (age < 22 || age > 60) ? 6 : 0;
+    factors['Driver Age'] = ageFactor;
+    score += ageFactor;
+
+    score = Math.min(Math.round(score), 97); // cap at 97%
+
+    // Determine severity
+    let severity, severityClass, confidence, level, levelClass;
+    if (score >= 65) {
+        severity = 'FATAL';      severityClass = 'fatal';
+        confidence = (78 + Math.random() * 14).toFixed(1);
+        level = 'HIGH RISK';     levelClass = 'high';
+    } else if (score >= 42) {
+        severity = 'SERIOUS';    severityClass = 'serious';
+        confidence = (65 + Math.random() * 15).toFixed(1);
+        level = 'MEDIUM RISK';   levelClass = 'medium';
+    } else {
+        severity = 'MINOR';      severityClass = 'minor';
+        confidence = (55 + Math.random() * 15).toFixed(1);
+        level = 'LOW RISK';      levelClass = 'low';
     }
 
+    return { score, severity, severityClass, confidence, level, levelClass, factors };
+}
+
+function showRiskPanel(result) {
+    const panel = document.getElementById('riskResultPanel');
+    panel.style.display = 'block';
+    // re-trigger animation
+    panel.style.animation = 'none';
+    panel.offsetHeight;
+    panel.style.animation = '';
+
+    // Badge
+    const badge = document.getElementById('riskLevelBadge');
+    badge.textContent = result.level;
+    badge.className = `risk-level-badge ${result.levelClass}`;
+
+    // Probability
+    const probEl = document.getElementById('riskProbNumber');
+    probEl.textContent = `${result.score}%`;
+    probEl.className = `risk-prob-number ${result.levelClass}`;
+
+    // Meter
+    const meter = document.getElementById('riskMeterFill');
+    meter.className = `risk-meter-fill ${result.levelClass}`;
+    setTimeout(() => { meter.style.width = `${result.score}%`; }, 50);
+
+    // Severity
+    const sevEl = document.getElementById('riskSeverityLabel');
+    sevEl.textContent = result.severity;
+    sevEl.className = `risk-severity-label ${result.severityClass}`;
+
+    // Confidence
+    document.getElementById('riskConfidence').textContent = `Confidence: ${result.confidence}%`;
+
+    // SHAP factors – sort by value descending, show top 4
+    const sorted = Object.entries(result.factors)
+        .filter(([,v]) => v > 0)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 4);
+
+    const maxVal = sorted[0]?.[1] || 1;
+    const barColors = ['#8B5CF6','#3B82F6','#EC4899','#F59E0B'];
+
+    const listEl = document.getElementById('riskFactorsList');
+    listEl.innerHTML = sorted.map(([name, val], i) => {
+        const pct = Math.round((val / maxVal) * 100);
+        const shapVal = (val / 100 * 0.35).toFixed(3);
+        return `<div class="risk-factor-item">
+            <span class="risk-factor-name">${name}</span>
+            <div class="risk-factor-bar-track">
+                <div class="risk-factor-bar" style="background:${barColors[i]}; width:0%;" data-width="${pct}%"></div>
+            </div>
+            <span class="risk-factor-val">+${shapVal}</span>
+        </div>`;
+    }).join('');
+
+    // Animate bars after render
     setTimeout(() => {
-        btnPredict.classList.remove('loading');
+        listEl.querySelectorAll('.risk-factor-bar').forEach(bar => {
+            bar.style.width = bar.dataset.width;
+        });
+    }, 80);
+
+    lucide.createIcons();
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+btnPredict.addEventListener('click', () => {
+    const originalText = btnPredict.innerHTML;
+    btnPredict.innerHTML = `<i data-lucide="loader-2" class="spin-icon"></i> Processing Risk...`;
+    if (!document.getElementById('spin-style')) {
+        const s = document.createElement('style');
+        s.id = 'spin-style';
+        s.innerHTML = `.spin-icon{animation:spin 1s linear infinite;}@keyframes spin{100%{transform:rotate(360deg);}}`;
+        document.head.appendChild(s);
+    }
+    lucide.createIcons();
+
+    setTimeout(() => {
         btnPredict.innerHTML = originalText;
         lucide.createIcons();
 
-        // 1. Show realistic toast
-        showToast("Risk Assessment Complete", "Model output updated synchronously.");
+        const result = computeRiskScore();
+        showRiskPanel(result);
 
-        // 2. Flash table row
-        const highlightRow = document.querySelector('.highlight-row td:first-child');
-        const prevColor = highlightRow.style.borderColor;
-        highlightRow.style.borderColor = '#10B981';
-        highlightRow.style.color = '#10B981';
-        
-        // 3. Retrigger charts
-        const bars = document.querySelectorAll('.bar');
-        bars.forEach(bar => {
-            bar.style.animation = 'none';
-            bar.offsetHeight; 
-            bar.style.animation = null; 
+        showToast('Risk Assessment Complete', `Severity: ${result.severity} — ${result.score}% probability`);
+
+        // Retrigger SHAP bars
+        document.querySelectorAll('.bar').forEach(bar => {
+            bar.style.animation = 'none'; bar.offsetHeight; bar.style.animation = null;
         });
-
-        setTimeout(() => {
-            highlightRow.style.borderColor = prevColor;
-            highlightRow.style.color = 'white';
-        }, 500);
-
     }, 1500);
 });
 

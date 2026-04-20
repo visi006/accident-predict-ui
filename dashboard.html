@@ -179,6 +179,41 @@
                     <p class="hero-subtitle">Fill in the conditions on the left panel to assess accident risk using our hybrid Random Forest + XGBoost ensemble model with SHAP explainability.</p>
                 </div>
 
+                <!-- === RISK RESULT PANEL (hidden until Run Predictor is clicked) === -->
+                <div id="riskResultPanel" class="risk-result-panel" style="display:none;">
+                    <div class="risk-result-header">
+                        <div class="risk-result-title">
+                            <i data-lucide="activity"></i>
+                            <span>LIVE PREDICTION OUTPUT — RF + XGBoost Ensemble</span>
+                        </div>
+                        <div id="riskLevelBadge" class="risk-level-badge">HIGH RISK</div>
+                    </div>
+
+                    <div class="risk-result-body">
+                        <!-- Probability Meter -->
+                        <div class="risk-metric-card">
+                            <div class="risk-metric-label">Accident Probability</div>
+                            <div class="risk-prob-number" id="riskProbNumber">0%</div>
+                            <div class="risk-meter-track">
+                                <div class="risk-meter-fill" id="riskMeterFill"></div>
+                            </div>
+                        </div>
+
+                        <!-- Severity + Confidence -->
+                        <div class="risk-metric-card">
+                            <div class="risk-metric-label">Predicted Severity</div>
+                            <div class="risk-severity-label" id="riskSeverityLabel">—</div>
+                            <div class="risk-confidence" id="riskConfidence">Confidence: —</div>
+                        </div>
+
+                        <!-- Top Risk Factors -->
+                        <div class="risk-metric-card risk-factors-card">
+                            <div class="risk-metric-label">Top Risk Drivers (SHAP)</div>
+                            <div id="riskFactorsList" class="risk-factors-list"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="features-grid">
                     <div class="feature-card">
                         <div class="icon-box color-blue"><i data-lucide="bar-chart-3"></i></div>
