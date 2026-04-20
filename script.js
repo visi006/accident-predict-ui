@@ -248,6 +248,7 @@ btnPredict.addEventListener('click', () => {
         lucide.createIcons();
 
         const result = computeRiskScore();
+        lastPredictionResult = result;
         showRiskPanel(result);
 
         showToast('Risk Assessment Complete', `Severity: ${result.severity} — ${result.score}% probability`);
@@ -259,46 +260,105 @@ btnPredict.addEventListener('click', () => {
     }, 1500);
 });
 
-// --- 5. New Features: Export, What-If, Dashboard ---
+// --- 5. Smart PDF Report Export ---
 const btnExport = document.getElementById('btnExport');
+
+// Store last prediction result globally so export can use it
+let lastPredictionResult = null;
+
 if(btnExport) {
     btnExport.addEventListener('click', () => {
         const ogContent = btnExport.innerHTML;
         btnExport.innerHTML = `<i data-lucide="loader-2" class="spin-icon"></i> Compiling...`;
         btnExport.disabled = true;
         lucide.createIcons();
-        const target = document.getElementById('predictView');
-        btnExport.style.display = 'none'; // hide button from pdf
-        
-        // Force background color on target (otherwise transparent becomes white in PDF)
-        const ogBg = target.style.background;
-        const ogPadding = target.style.padding;
-        target.style.background = '#0B0F19';
-        target.style.padding = '20px';
-        target.style.borderRadius = '16px';
-        
+
+        // If no prediction run yet, compute one now
+        const result = lastPredictionResult || computeRiskScore();
+
+        // --- Populate Report Template ---
+        const reportId = 'AP-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+        const now = new Date();
+        const dateStr = now.toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+        document.getElementById('rptId').textContent   = reportId;
+        document.getElementById('rptDate').textContent = dateStr;
+
+        // Banner colours per risk level
+        const bannerColors = { high: { bg:'#FEE2E2', color:'#991B1B' }, medium: { bg:'#FEF3C7', color:'#92400E' }, low: { bg:'#D1FAE5', color:'#065F46' } };
+        const bc = bannerColors[result.levelClass] || bannerColors.high;
+        const banner = document.getElementById('rptBanner');
+        banner.style.background = bc.bg;
+        banner.style.color = bc.color;
+
+        document.getElementById('rptLevel').textContent    = result.level;
+        document.getElementById('rptProb').textContent     = result.score + '%';
+        document.getElementById('rptSeverity').textContent = result.severity;
+        document.getElementById('rptConf').textContent     = 'Confidence: ' + result.confidence + '%';
+
+        // Section 1 — Parameters table
+        const selects = document.querySelectorAll('#predictionForm select');
+        const inputs  = document.querySelectorAll('#predictionForm input[type="number"]');
+        const params  = [
+            ['Weather Conditions', selects[0]?.value],
+            ['Road Condition',     selects[1]?.value],
+            ['Lighting Conditions',selects[2]?.value],
+            ['Road Type',          selects[3]?.value],
+            ['Traffic Control',    selects[4]?.value],
+            ['Accident Location',  selects[5]?.value],
+            ['Driver Gender',      selects[6]?.value],
+            ['Speed Limit (km/h)', inputs[0]?.value],
+            ['Driver Age',         inputs[1]?.value],
+        ];
+        const rptParams = document.getElementById('rptParams');
+        rptParams.innerHTML = params.map((p, i) => `
+            <tr style="background:${i%2===0?'#f9f9f9':'#fff'}; border-bottom:1px solid #eee;">
+                <td style="padding:7px 12px; font-weight:600; color:#444; width:50%;">${p[0]}</td>
+                <td style="padding:7px 12px; color:#222;">${p[1] || '—'}</td>
+            </tr>`).join('');
+
+        // Section 2 — SHAP table
+        const sorted = Object.entries(result.factors)
+            .filter(([,v]) => v > 0)
+            .sort((a,b) => b[1]-a[1]).slice(0,4);
+        const maxV = sorted[0]?.[1] || 1;
+        document.getElementById('rptShap').innerHTML = sorted.map(([name, val], i) => {
+            const pct = Math.round((val/maxV)*100);
+            const shapVal = (val/100*0.35).toFixed(3);
+            return `<tr style="border-bottom:1px solid #eee; background:${i%2===0?'#fff':'#f9f9f9'};">
+                <td style="padding:8px 12px;">${i+1}</td>
+                <td style="padding:8px 12px; font-weight:600;">${name}</td>
+                <td style="padding:8px 12px; font-family:monospace;">+${shapVal}</td>
+                <td style="padding:8px 12px;">
+                    <div style="background:#eee;border-radius:4px;height:8px;overflow:hidden;">
+                        <div style="width:${pct}%;height:100%;background:#1a1a2e;border-radius:4px;"></div>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+
+        // Show report div, generate PDF, then hide it again
+        const tpl = document.getElementById('pdfReportTemplate');
+        tpl.style.display = 'block';
+
         const opt = {
-            margin:       0.2, // 0.2 inch margin
-            filename:     'IncidentReport_2026.pdf',
-            image:        { type: 'jpeg', quality: 1.0 },
-            html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#0B0F19', scrollY: 0 },
-            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            margin: 0,
+            filename: `AcciPredict_Report_${reportId}.pdf`,
+            image: { type: 'jpeg', quality: 1.0 },
+            html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        html2pdf().set(opt).from(target).save().then(() => {
-            btnExport.style.display = 'flex';
-            target.style.background = ogBg;
-            target.style.padding = ogPadding;
+        html2pdf().set(opt).from(document.getElementById('pdfReportContent')).save().then(() => {
+            tpl.style.display = 'none';
             btnExport.innerHTML = ogContent;
             btnExport.disabled = false;
             lucide.createIcons();
-            showToast("Report Exported", "IncidentReport_2026.pdf downloaded securely.");
+            showToast('Report Exported', `${reportId}.pdf downloaded successfully.`);
         }).catch(err => {
             console.error(err);
-            btnExport.style.display = 'flex';
-            target.style.background = ogBg;
-            target.style.padding = ogPadding;
-            btnExport.innerHTML = "Error";
+            tpl.style.display = 'none';
+            btnExport.innerHTML = ogContent;
             btnExport.disabled = false;
         });
     });
