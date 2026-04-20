@@ -1,4 +1,4 @@
-const CACHE_NAME = 'accipredict-v2';
+const CACHE_NAME = 'accipredict-v3';
 const ASSETS = [
   './',
   './index.html',
