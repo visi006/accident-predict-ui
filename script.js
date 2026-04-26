@@ -386,46 +386,119 @@ function renderCharts() {
     if(chartsRendered) return;
     chartsRendered = true;
     
+    // 1. Line Chart: Trend
     new Chart(document.getElementById('trendChart'), {
         type: 'line',
         data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            labels: ['2021 Q1', '2021 Q2', '2021 Q3', '2021 Q4', '2022 Q1', '2022 Q2', '2022 Q3', '2022 Q4', '2023 Q1', '2023 Q2', '2023 Q3', '2023 Q4'],
             datasets: [{
-                label: 'Accidents',
+                label: 'Total Incidents',
                 data: [420, 380, 510, 490, 600, 750, 820, 710, 650, 580, 480, 510],
-                borderColor: '#8B5CF6',
-                backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                borderWidth: 2, fill: true, tension: 0.4
+                borderColor: '#10B981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderWidth: 3, fill: true, tension: 0.4,
+                pointBackgroundColor: '#10B981', pointRadius: 4
             }]
         },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748B' } }, x: { grid: { display: false }, ticks: { color: '#64748B' } } } }
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+            }
+        }
     });
-    
+
+    // 2. Pie Chart: Severity
     new Chart(document.getElementById('severityChart'), {
         type: 'doughnut',
         data: {
             labels: ['Minor', 'Serious', 'Fatal'],
             datasets: [{
-                data: [34, 33, 33],
-                backgroundColor: ['#3B82F6', '#F59E0B', '#EF4444'],
-                borderWidth: 0
+                data: [4240, 4130, 4172],
+                backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
+                borderWidth: 0, hoverOffset: 15
             }]
         },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'right', labels: { color: '#94A3B8' } } } }
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 20, font: { size: 11 } } } },
+            cutout: '70%'
+        }
     });
 
+    // 3. Bar Chart: Vehicle Types
     new Chart(document.getElementById('vehicleChart'), {
         type: 'bar',
         data: {
-            labels: ['2-Wheeler', 'Car', 'Truck', 'Bus', 'Walking', 'Cycle'],
+            labels: ['2-Wheeler', 'Car', 'Bus', 'Truck', 'Auto'],
             datasets: [{
-                data: [1250, 980, 610, 420, 310, 250],
+                label: 'Involvement Rate',
+                data: [45, 30, 10, 8, 7],
                 backgroundColor: '#3B82F6',
-                borderRadius: 4
+                borderRadius: 6
             }]
         },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748B' } }, x: { grid: { display: false }, ticks: { color: '#64748B' } } } }
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+            }
+        }
     });
+
+    // 4. NEW: Scatter Chart (Speed vs Risk)
+    new Chart(document.getElementById('scatterChart'), {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Incident Clusters',
+                data: Array.from({length: 50}, () => ({
+                    x: Math.floor(Math.random() * 80) + 40,
+                    y: Math.floor(Math.random() * 60) + 20
+                })),
+                backgroundColor: 'rgba(167, 139, 250, 0.6)',
+                pointRadius: 6, pointHoverRadius: 10
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { title: { display: true, text: 'Risk Probability (%)', color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                x: { title: { display: true, text: 'Speed Limit (km/h)', color: '#94a3b8' }, grid: { display: false }, ticks: { color: '#94a3b8' } }
+            }
+        }
+    });
+
+    // 5. NEW: Correlation Heatmap (DOM Generation)
+    const heatmapData = [
+        [1.0, 0.4, 0.2, 0.1, 0.6],
+        [0.4, 1.0, 0.8, 0.3, 0.1],
+        [0.2, 0.8, 1.0, 0.4, 0.2],
+        [0.1, 0.3, 0.4, 1.0, 0.7],
+        [0.6, 0.1, 0.2, 0.7, 1.0]
+    ];
+    const labels = ['SPD', 'WTH', 'LIT', 'AGE', 'ROD'];
+    const heatmapContainer = document.getElementById('correlationHeatmap');
+    
+    heatmapData.forEach((row, i) => {
+        row.forEach((val, j) => {
+            const cell = document.createElement('div');
+            cell.className = 'heatmap-cell';
+            cell.title = `${labels[i]} vs ${labels[j]}: ${val}`;
+            // Color based on correlation value
+            const opacity = val; 
+            cell.style.background = `rgba(139, 92, 246, ${opacity})`;
+            cell.textContent = val.toFixed(1);
+            heatmapContainer.appendChild(cell);
+        });
+    });
+
+    lucide.createIcons();
 }
 
 // --- 6. Leaflet Live Map Setup ---

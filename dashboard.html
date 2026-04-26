@@ -297,21 +297,85 @@
             <!-- === VIEW 3: DASHBOARD === -->
             <div id="dashboardView" class="view-section" style="display: none; height: 100%;">
                 <div class="map-header" style="margin-bottom: 2rem;">
-                    <h2>Data Analytics Dashboard</h2>
-                    <p>Exploratory Data Analysis over the full 192-page Historical Dataset.</p>
+                    <div class="flex-header">
+                        <div>
+                            <h2>Dataset Intelligence Lab</h2>
+                            <p>Deep dive into the 12.5K+ records of historical Indian road traffic accident data.</p>
+                        </div>
+                        <div class="dataset-badge">771,264 rows</div>
+                    </div>
+                </div>
+
+                <!-- NEW: Dataset Overview Stats Cards -->
+                <div class="dataset-stats-grid">
+                    <div class="stat-card-mini">
+                        <div class="stat-icon"><i data-lucide="database"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-value">12,542</span>
+                            <span class="stat-label">Total Records</span>
+                        </div>
+                    </div>
+                    <div class="stat-card-mini">
+                        <div class="stat-icon"><i data-lucide="layers"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-value">22</span>
+                            <span class="stat-label">Features</span>
+                        </div>
+                    </div>
+                    <div class="stat-card-mini">
+                        <div class="stat-icon"><i data-lucide="calendar"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-value">2021-24</span>
+                            <span class="stat-label">Year Range</span>
+                        </div>
+                    </div>
+                    <div class="stat-card-mini">
+                        <div class="stat-icon"><i data-lucide="trending-up"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-value">Fatal</span>
+                            <span class="stat-label">Top Severity</span>
+                        </div>
+                    </div>
+                    <div class="stat-card-mini highlight">
+                        <div class="stat-icon"><i data-lucide="map-pin"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-value">Bengaluru</span>
+                            <span class="stat-label">Hottest City</span>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="charts-grid">
+                    <!-- Original Line Chart -->
                     <div class="chart-container wide">
-                        <div class="chart-title">Accidents Trend by Month</div>
+                        <div class="chart-title"><i data-lucide="line-chart"></i> Yearly Accident Trend Analysis</div>
                         <div class="canvas-wrapper"><canvas id="trendChart"></canvas></div>
                     </div>
+
+                    <!-- NEW: Correlation Heatmap -->
                     <div class="chart-container">
-                        <div class="chart-title">Severity Breakdown</div>
+                        <div class="chart-title"><i data-lucide="grid"></i> Feature Correlation Matrix</div>
+                        <div class="heatmap-wrapper">
+                            <!-- We will build a CSS/JS Heatmap here -->
+                            <div id="correlationHeatmap" class="correlation-heatmap"></div>
+                        </div>
+                    </div>
+
+                    <!-- Original Pie Chart -->
+                    <div class="chart-container">
+                        <div class="chart-title"><i data-lucide="pie-chart"></i> Severity Breakdown</div>
                         <div class="canvas-wrapper" style="height: 250px;"><canvas id="severityChart"></canvas></div>
                     </div>
+
+                    <!-- NEW: Scatter Plot Container -->
+                    <div class="chart-container wide">
+                        <div class="chart-title"><i data-lucide="dot-chart"></i> Scatter Analysis: Speed vs. Risk Probability</div>
+                        <div class="canvas-wrapper"><canvas id="scatterChart"></canvas></div>
+                    </div>
+
+                    <!-- Original Vehicle Chart -->
                     <div class="chart-container">
-                        <div class="chart-title">Vehicle Types Involved</div>
+                        <div class="chart-title"><i data-lucide="car"></i> Vehicle Types Involved</div>
                         <div class="canvas-wrapper" style="height: 250px;"><canvas id="vehicleChart"></canvas></div>
                     </div>
                 </div>
