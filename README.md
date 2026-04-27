@@ -10,6 +10,10 @@ AcciPredict is a **Progressive Web App (PWA)** that leverages Machine Learning t
 - **Predictive Analytics:** Real-time risk scoring based on environmental and temporal features.
 - **Interactive Mapping:** Geospatial visualization of accident-prone "hotspots."
 - **Data-Driven Insights:** Integrated `dataset.csv` processing for historical trend analysis.
+## System Architecture
+
+<img width="481" height="430" alt="image" src="https://github.com/user-attachments/assets/37897fe1-9fc8-47cf-8afc-f5dc304840fc" />
+
 ## 🛠️ Tech Stack
 - **Languages:** JavaScript (ES6+), Python 3.x, HTML5, CSS3
 - **Runtime:** Node.js
